@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: Home Users API
+  description: REST API for user management (Centro Cultural de Aragón de Tarragona)
+  version: 1.0.0
+
+servers:
+  - url: /api
+    description: API base path
+
+paths:
+  /users:
+    get:
+      summary: List all users
+      operationId: getUsers
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+    post:
+      summary: Create a new user
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+            example:
+              id: 550e8400-e29b-41d4-a716-446655440000
+              name: Joan
+              first_surname: Garcia
+              second_surname: Pérez
+              dni: 12345678Z
+              email: joan.garcia@example.com
+              phone_number: "612345678"
+              bank_account_number: ES9121000418450200051332
+              date_of_birth: "1990-06-15"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict — a user with the same email or DNI already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'A user with email "joan.garcia@example.com" already exists.'
+        '422':
+          description: Unprocessable Entity — validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid DNI format.
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: User UUID v4
+        schema:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    get:
+      summary: Get a user by ID
+      operationId: getUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: User with id "550e8400-e29b-41d4-a716-446655440000" not found.
+        '422':
+          description: Unprocessable Entity — invalid UUID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid UUID format.
+
+    put:
+      summary: Update an existing user
+      operationId: updateUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+            example:
+              id: 550e8400-e29b-41d4-a716-446655440000
+              name: Joan
+              first_surname: Garcia
+              second_surname: Pérez
+              dni: 12345678Z
+              email: joan.garcia@example.com
+              phone_number: "612345678"
+              bank_account_number: ES9121000418450200051332
+              date_of_birth: "1990-06-15"
+      responses:
+        '204':
+          description: User updated successfully (no content)
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: User with id "550e8400-e29b-41d4-a716-446655440000" not found.
+        '409':
+          description: Conflict — another user already has the same email or DNI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'A user with email "joan.garcia@example.com" already exists.'
+        '422':
+          description: Unprocessable Entity — validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid DNI format.
+
+    delete:
+      summary: Delete a user by ID
+      operationId: deleteUser
+      tags:
+        - Users
+      responses:
+        '204':
+          description: User deleted successfully (no content)
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: User with id "550e8400-e29b-41d4-a716-446655440000" not found.
+        '422':
+          description: Unprocessable Entity — invalid UUID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid UUID format.
+
+components:
+  schemas:
+    UserRequest:
+      type: object
+      required:
+        - id
+        - name
+        - first_surname
+        - second_surname
+        - dni
+        - email
+        - phone_number
+        - bank_account_number
+        - date_of_birth
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID v4 identifier. Must be provided by the client.
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          maxLength: 100
+          description: First name (non-empty).
+          example: Joan
+        first_surname:
+          type: string
+          maxLength: 100
+          description: First surname (non-empty).
+          example: Garcia
+        second_surname:
+          type: string
+          maxLength: 100
+          description: Second surname (non-empty).
+          example: Pérez
+        dni:
+          type: string
+          pattern: '^\d{8}[A-Z]$'
+          description: Spanish DNI — 8 digits followed by an uppercase letter. Checksum is validated via the MOD-23 algorithm.
+          example: 12345678Z
+        email:
+          type: string
+          format: email
+          description: Valid email address. Normalized to lowercase. Must be unique.
+          example: joan.garcia@example.com
+        phone_number:
+          type: string
+          description: Phone number, 7–15 digits. Optional leading + for country code (E.164 compatible). Spaces are stripped.
+          example: "612345678"
+        bank_account_number:
+          type: string
+          description: IBAN bank account number. Validated with MOD-97 checksum. Spaces are stripped and normalized to uppercase.
+          example: ES9121000418450200051332
+        date_of_birth:
+          type: string
+          format: date
+          description: Date of birth in YYYY-MM-DD format. Cannot be a future date.
+          example: "1990-06-15"
+
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserRequest'
+        - type: object
+          properties:
+            created_at:
+              type: string
+              format: date-time
+              description: ISO 8601 timestamp of when the user was created. Read-only.
+              example: "2024-03-21T10:30:45+00:00"
+            updated_at:
+              type: string
+              format: date-time
+              description: ISO 8601 timestamp of the last update. Read-only.
+              example: "2024-03-21T10:30:45+00:00"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+          example: User not found.
+
+tags:
+  - name: Users
+    description: User management endpoints
