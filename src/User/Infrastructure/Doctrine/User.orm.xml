@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\User\Infrastructure\Doctrine\UserDoctrineEntity" table="users">
+
+        <id name="id" type="string" length="36" column="id">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="name" type="string" length="100" column="name" nullable="false"/>
+        <field name="firstSurname" type="string" length="100" column="first_surname" nullable="false"/>
+        <field name="secondSurname" type="string" length="100" column="second_surname" nullable="false"/>
+        <field name="dni" type="string" length="9" column="dni" nullable="false" unique="true"/>
+        <field name="email" type="string" length="255" column="email" nullable="false" unique="true"/>
+        <field name="phoneNumber" type="string" length="20" column="phone_number" nullable="false"/>
+        <field name="bankAccountNumber" type="string" length="34" column="bank_account_number" nullable="false"/>
+        <field name="dateOfBirth" type="date_immutable" column="date_of_birth" nullable="false"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at" nullable="false"/>
+        <field name="updatedAt" type="datetime_immutable" column="updated_at" nullable="false"/>
+
+    </entity>
+
+</doctrine-mapping>
