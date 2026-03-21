@@ -153,6 +153,61 @@ The `id` field is optional on `POST` — a UUID v4 is generated automatically if
 
 ---
 
+## Docker
+
+All Docker and Docker Compose files live under `ops/docker/`.
+
+```
+ops/docker/
+├── Dockerfile                  # Multi-stage build (dev / prod targets)
+├── docker-compose.yml          # Dev stack: php-fpm + nginx + postgres
+├── docker-compose.prod.yml     # Production overrides
+├── .env.example                # Copy to .env and fill in secrets
+├── nginx/
+│   └── default.conf            # Nginx → PHP-FPM (Symfony front controller)
+└── php/
+    ├── php.ini                 # OPcache, memory, timezone
+    └── php-fpm.conf            # FPM pool settings
+```
+
+### Start dev environment
+
+```bash
+cd ops/docker
+cp .env.example .env            # fill in secrets
+docker compose up -d --build
+docker compose exec php php bin/console doctrine:migrations:migrate
+```
+
+API available at `http://localhost:8080/api/users`.
+
+### Start production environment
+
+```bash
+cd ops/docker
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+In production the database port is **not** exposed and the PHP image is built with `--no-dev` composer deps and a warmed-up cache.
+
+### Useful commands
+
+```bash
+# Run migrations inside container
+docker compose exec php php bin/console doctrine:migrations:migrate
+
+# Run unit tests inside container
+docker compose exec php vendor/bin/phpunit --configuration phpunit.dist.xml
+
+# Tail logs
+docker compose logs -f php nginx
+
+# Stop everything
+docker compose down
+```
+
+---
+
 ## Pre-commit Checklist
 
 Before pushing:
