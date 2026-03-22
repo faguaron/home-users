@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Http\Controller;
 
+use App\Shared\Application\Bus\Command\CommandBusInterface;
 use App\User\Application\Create\CreateUserCommand;
-use App\User\Application\Create\CreateUserCommandHandler;
 use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Domain\ValueObject\UserId;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CreateUserController
 {
     public function __construct(
-        private readonly CreateUserCommandHandler $handler,
+        private readonly CommandBusInterface $commandBus,
     ) {
     }
 
@@ -32,7 +32,7 @@ final class CreateUserController
         $id = isset($data['id']) ? (string) $data['id'] : UserId::generate()->value();
 
         try {
-            ($this->handler)(new CreateUserCommand(
+            $this->commandBus->dispatch(new CreateUserCommand(
                 id: $id,
                 name: (string) ($data['name'] ?? ''),
                 firstSurname: (string) ($data['first_surname'] ?? ''),

@@ -6,7 +6,9 @@ namespace App\User\Application\FindAll;
 
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\User;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler(bus: 'query.bus')]
 final class FindAllUsersQueryHandler
 {
     public function __construct(

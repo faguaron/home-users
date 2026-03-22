@@ -16,7 +16,9 @@ use App\User\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\UserName;
 use App\User\Domain\ValueObject\UserPhoneNumber;
 use App\User\Domain\ValueObject\UserSecondSurname;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler(bus: 'command.bus')]
 final class UpdateUserCommandHandler
 {
     public function __construct(

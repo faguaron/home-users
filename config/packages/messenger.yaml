@@ -1,0 +1,11 @@
+framework:
+    messenger:
+        default_bus: command.bus
+
+        buses:
+            command.bus:
+                middleware:
+                    - id: App\Shared\Infrastructure\Bus\Middleware\OpenApiLoggingMiddleware
+            query.bus:
+                middleware:
+                    - id: App\Shared\Infrastructure\Bus\Middleware\OpenApiLoggingMiddleware

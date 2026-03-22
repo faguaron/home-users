@@ -8,7 +8,9 @@ use App\User\Domain\Exception\UserNotFoundException;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\User;
 use App\User\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler(bus: 'query.bus')]
 final class FindUserQueryHandler
 {
     public function __construct(
