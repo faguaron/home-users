@@ -22,3 +22,13 @@ services:
     # Bind the repository interface to its Doctrine implementation
     App\User\Domain\Repository\UserRepositoryInterface:
         class: App\User\Infrastructure\Persistence\DoctrineUserRepository
+
+when@test:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+            bind:
+                string $projectDir: '%kernel.project_dir%'
+        Tests\Behat\:
+            resource: '../tests/Behat/'
