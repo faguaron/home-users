@@ -59,10 +59,17 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "git config core.hooksPath .githooks || true"
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "test:unit": "phpunit",
+        "test:behat": "behat --colors",
+        "test": [
+            "@test:unit",
+            "@test:behat"
         ]
     },
     "conflict": {
@@ -75,7 +82,12 @@
         }
     },
     "require-dev": {
+        "behat/behat": "^3.14",
+        "friends-of-behat/mink-browserkit-driver": "^1.0",
+        "friends-of-behat/mink-extension": "^2.7",
+        "friends-of-behat/symfony-extension": "^2.5",
         "friendsofphp/php-cs-fixer": "^3.94",
+        "justinrainbow/json-schema": "^5.3",
         "phpunit/phpunit": "^13.0",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*"

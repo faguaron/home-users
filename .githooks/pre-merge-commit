@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo ""
+echo -e "${YELLOW}[pre-merge-commit] Running PHPUnit unit tests...${NC}"
+if ! ./vendor/bin/phpunit --colors=always; then
+    echo -e "${RED}[pre-merge-commit] PHPUnit unit tests FAILED. Merge blocked.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}[pre-merge-commit] PHPUnit unit tests passed.${NC}"
+
+echo ""
+echo -e "${YELLOW}[pre-merge-commit] Running Behat E2E tests...${NC}"
+if ! ./vendor/bin/behat --colors --no-interaction; then
+    echo -e "${RED}[pre-merge-commit] Behat E2E tests FAILED. Merge blocked.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}[pre-merge-commit] Behat E2E tests passed.${NC}"
+
+echo ""
+echo -e "${GREEN}[pre-merge-commit] All tests passed. Merge allowed.${NC}"
+exit 0
