@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\User\Application\Create;
 
 use App\User\Domain\Exception\UserAlreadyExistsException;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\User\Domain\Repository\UserRepositoryInterface;
+
 use App\User\Domain\User;
 use App\User\Domain\ValueObject\UserBankAccountNumber;
 use App\User\Domain\ValueObject\UserDateOfBirth;
@@ -17,6 +19,7 @@ use App\User\Domain\ValueObject\UserName;
 use App\User\Domain\ValueObject\UserPhoneNumber;
 use App\User\Domain\ValueObject\UserSecondSurname;
 
+#[AsMessageHandler(bus: 'command.bus')]
 final class CreateUserCommandHandler
 {
     public function __construct(

@@ -25,27 +25,14 @@ services:
     App\User\Domain\Repository\UserRepositoryInterface:
         class: App\User\Infrastructure\Persistence\DoctrineUserRepository
 
-    # Tag the logging middleware so buses can collect it
-    App\Shared\Infrastructure\Bus\Middleware\OpenApiLoggingMiddleware:
-        tags:
-            - { name: app.bus.middleware }
-
-    # Command bus wired with middleware and a handler locator
+    # Wire each bus wrapper to its named Symfony Messenger bus
     App\Shared\Infrastructure\Bus\CommandBus:
         arguments:
-            $middleware: !tagged_iterator app.bus.middleware
-            $handlers: !service_locator
-                'App\User\Application\Create\CreateUserCommand': '@App\User\Application\Create\CreateUserCommandHandler'
-                'App\User\Application\Update\UpdateUserCommand': '@App\User\Application\Update\UpdateUserCommandHandler'
-                'App\User\Application\Delete\DeleteUserCommand': '@App\User\Application\Delete\DeleteUserCommandHandler'
+            $messageBus: '@command.bus'
 
-    # Query bus wired with middleware and a handler locator
     App\Shared\Infrastructure\Bus\QueryBus:
         arguments:
-            $middleware: !tagged_iterator app.bus.middleware
-            $handlers: !service_locator
-                'App\User\Application\Find\FindUserQuery': '@App\User\Application\Find\FindUserQueryHandler'
-                'App\User\Application\FindAll\FindAllUsersQuery': '@App\User\Application\FindAll\FindAllUsersQueryHandler'
+            $messageBus: '@query.bus'
 
     # Bind bus interfaces to their concrete implementations
     App\Shared\Application\Bus\Command\CommandBusInterface:
