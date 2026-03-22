@@ -15,7 +15,7 @@ jobs:
       database:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: home_users_test
+          POSTGRES_DB: home_users
           POSTGRES_USER: app
           POSTGRES_PASSWORD: secret
         ports:
@@ -39,7 +39,7 @@ jobs:
             --network host \
             -e APP_ENV=test \
             -e APP_SECRET='$ecretf0rt3st' \
-            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users?serverVersion=16&charset=utf8" \
             home-users:dev \
             php bin/console doctrine:schema:create --env=test
 
@@ -49,7 +49,7 @@ jobs:
             --network host \
             -e APP_ENV=test \
             -e APP_SECRET='$ecretf0rt3st' \
-            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users?serverVersion=16&charset=utf8" \
             home-users:dev \
             composer test:unit
 
@@ -59,6 +59,6 @@ jobs:
             --network host \
             -e APP_ENV=test \
             -e APP_SECRET='$ecretf0rt3st' \
-            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users?serverVersion=16&charset=utf8" \
             home-users:dev \
             composer test:behat
