@@ -55,16 +55,22 @@ FROM php:8.4-fpm-alpine AS runtime
 
 WORKDIR /var/www/html
 
-# System deps for runtime only
+# System deps for runtime only; -dev packages are needed to compile extensions
+# and removed afterward to keep the image small
 RUN apk add --no-cache \
         libpq \
         libzip \
         icu \
+    && apk add --no-cache --virtual .build-deps \
+        libpq-dev \
+        libzip-dev \
+        icu-dev \
     && docker-php-ext-install \
         pdo_pgsql \
         zip \
         intl \
-        opcache
+        opcache \
+    && apk del .build-deps
 
 # Copy custom PHP and FPM config
 COPY ops/docker/php/php.ini     /usr/local/etc/php/conf.d/app.ini
