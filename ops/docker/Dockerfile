@@ -85,6 +85,8 @@ USER www-data
 # ──────────────────────────────────────────────
 FROM runtime AS dev
 
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 COPY --chown=www-data:www-data --from=dev-deps /app/vendor ./vendor
 COPY --chown=www-data:www-data . .
 
