@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\User\Application\Create;
 
-final class CreateUserCommand
+use App\Shared\Application\Bus\Command\CommandInterface;
+
+final class CreateUserCommand implements CommandInterface
 {
     public function __construct(
         public readonly string $id,

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Http\Controller;
 
+use App\Shared\Application\Bus\Query\QueryBusInterface;
 use App\User\Application\Find\FindUserQuery;
-use App\User\Application\Find\FindUserQueryHandler;
 use App\User\Domain\Exception\UserNotFoundException;
+use App\User\Domain\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,14 +16,15 @@ use Symfony\Component\Routing\Attribute\Route;
 final class GetUserController
 {
     public function __construct(
-        private readonly FindUserQueryHandler $handler,
+        private readonly QueryBusInterface $queryBus,
     ) {
     }
 
     public function __invoke(string $id): JsonResponse
     {
         try {
-            $user = ($this->handler)(new FindUserQuery($id));
+            /** @var User $user */
+            $user = $this->queryBus->dispatch(new FindUserQuery($id));
         } catch (UserNotFoundException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         } catch (\InvalidArgumentException $e) {

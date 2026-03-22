@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Http\Controller;
 
+use App\Shared\Application\Bus\Command\CommandBusInterface;
 use App\User\Application\Update\UpdateUserCommand;
-use App\User\Application\Update\UpdateUserCommandHandler;
 use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Domain\Exception\UserNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UpdateUserController
 {
     public function __construct(
-        private readonly UpdateUserCommandHandler $handler,
+        private readonly CommandBusInterface $commandBus,
     ) {
     }
 
@@ -30,7 +30,7 @@ final class UpdateUserController
         }
 
         try {
-            ($this->handler)(new UpdateUserCommand(
+            $this->commandBus->dispatch(new UpdateUserCommand(
                 id: $id,
                 name: (string) ($data['name'] ?? ''),
                 firstSurname: (string) ($data['first_surname'] ?? ''),
