@@ -8,40 +8,57 @@ on:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php-version }}
+    name: Tests
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        php-version: ['8.2', '8.3']
+    services:
+      database:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: home_users_test
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
-          extensions: ctype, iconv, pdo_sqlite
-          coverage: none
+      - name: Build Docker dev image
+        run: docker build --target dev -t home-users:dev -f ops/docker/Dockerfile .
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
+      - name: Create test database schema
+        run: |
+          docker run --rm \
+            --network host \
+            -e APP_ENV=test \
+            -e APP_SECRET='$ecretf0rt3st' \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            home-users:dev \
+            php bin/console doctrine:schema:create --env=test
 
       - name: Run unit tests
-        run: composer test:unit
+        run: |
+          docker run --rm \
+            --network host \
+            -e APP_ENV=test \
+            -e APP_SECRET='$ecretf0rt3st' \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            home-users:dev \
+            composer test:unit
 
       - name: Run Behat tests
-        run: composer test:behat
+        run: |
+          docker run --rm \
+            --network host \
+            -e APP_ENV=test \
+            -e APP_SECRET='$ecretf0rt3st' \
+            -e DATABASE_URL="postgresql://app:secret@localhost:5432/home_users_test?serverVersion=16&charset=utf8" \
+            home-users:dev \
+            composer test:behat
